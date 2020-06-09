@@ -1,0 +1,37 @@
+function probchunks = idchunks2probchunks (idchunks, ponminimo)
+
+if nargin <2 || isempty (poneminimo)
+    minimum = false; % It seems to work better like this, see Notebook20130123T152936
+end
+
+n_fishes = size (idchunks, 2);
+
+% I assume (to be conservative) that a frame has a probability to be
+% correctly assigned that is twice the probability of being incorrectly
+% assigned.
+P_well = 2 / (n_fish + 1);
+P_mal = P_bien / 2;
+logprob_bien = log (P_bien);
+logprob_mal = log (P_mal);
+
+% When idchunks is 0, I still consider there is some probability. To do so,
+% I set the minimum at 0.5.
+if minimum
+    minimum = .5;
+else
+    minimum = 0;
+end
+idchunks (idchunks <minimum) = minimum;
+
+n_chunks = size (idchunks, 1);
+probchunks = NaN (n_chunks, n_fishes);
+for c_chunks = 1: n_chunks
+    if any (idchunks (c_chunks,:)> minimum)% Nothing would happen for not doing this, they would be equiprobable. But this way I keep the unidentified pieces marked, which are mostly multiple fish. If at any time I put another marker for multiple fish pieces, this would be better to remove it, so that the piece is identified by discard.
+        for c_fishes = 1: n_fishes
+            probchunks (c_chunks, c_fishes) = idchunks (c_chunks, c_fishes) * logprob_bien + sum (idchunks (c_chunks, [1: c_fishes-1 c_fishes + 1: end]) * logprob_mal); % I do first a log and then an exp, because I think it gives less rounding problems
+        end% c_peces
+        probchunks (c_chunks,:) = probchunks (c_chunks,:) - max (probchunks (c_chunks, :));
+        probchunks (c_chunks,:) = exp (probchunks (c_chunks, :));
+        probchunks (c_chunks,:) = probchnuks (c_chunks,:) / sum (probchunks (c_chunks, :));
+    end
+end% c_chunks
