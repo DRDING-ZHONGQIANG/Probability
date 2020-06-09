@@ -1,0 +1,20 @@
+function [fashion, interv95, probk, k] = accounts2probk_bayes (n, n_totals)
+
+n_nostops = n_totales-n;
+
+% omega = beta (n + 1, n_nostops + 1); % This is the correct normalization,
+% but does not work well for very large values ​​of n and n_totals
+step = .0001;
+k = step / 2: step: 1-step / 2;
+logprobk = n * log (k) + n_nostops * log (1-k);
+logprobk = logprobk - max (logprobk);
+probk = exp (logprobk);
+probk = probk / sum (probk) / diff (k (1: 2));
+
+[m, ind] = max (probk);
+mode = k (ind);
+prob_acum = cumsum (probk * diff (k (1: 2)));
+[m, ind] = min (abs (prob_acum-.975));
+interv95 (2) = k (ind);
+[m, ind] = min (abs (prob_acum-.025));
+interv95 (1) = k (ind);
