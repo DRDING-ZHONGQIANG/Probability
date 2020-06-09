@@ -1,0 +1,95 @@
+
+function [stain2fish,piece2fish,probchunks_relac]=probchunks2identities(chunks,probchunks,womb,threshold_probable)
+
+if nargin<4 || isempty(threshold_probable)
+    threshold_probable=0; 
+end
+
+n_chunks     = max(chunks(:));
+tam_chunks   = size(chunks);
+n_fishes     = size(probchunks,2);
+
+othersfishes = NaN(n_fishes,n_fishes-1);
+for c_fishes = 1:n_fishes
+    othersfishes(c_fishes,:) = [1:c_fishes-1 c_fishes+1:n_fishes];
+end 
+
+probchunks_relac = NaN(n_chunks,n_fishes);
+for c_chunks     = 1:n_chunks
+    if ~isnan(probchunks(c_chunks,1))
+        otherschunks  =  find(womb(c_chunks,:) > 0);
+        otherschunks(otherschunks == c_chunks)=[];
+        otherschunks  =  otherschunks(~isnan(probchunks(otherschunks,1)));
+        for c_fishes  =  1:n_fishes
+            probchunks_relac(c_chunks,c_fishes)     = log(probchunks(c_chunks,c_fishes));
+            for c_others=otherschunks(:)'
+                probarenot  =  womb(c_chunks,c_others);
+                probchunks_relac(c_chunks,c_fishes) = probchunks_relac(c_chunks,c_fishes)+log(probarenot*(1-probchunks(c_others,c_fishes))+(1-probarenot));
+            end 
+        end 
+        probchunks_relac(c_chunks,:)  =  probchunks_relac(c_chunks,:)-max(probchunks_relac(c_chunks,:));
+        probchunks_relac(c_chunks,:)  =  exp(probchunks_relac(c_chunks,:));
+        probchunks_relac(c_chunks,:)  =  probchunks_relac(c_chunks,:)/sum(probchunks_relac(c_chunks,:));
+    end 
+end 
+
+clear c_chunks
+
+greater           =  max(probchunks_relac,[],2);
+piece2fish        =  NaN(n_chunks,1);
+probchunks_relac2 =  probchunks_relac;
+
+while any(~isnan(greater))
+    [m,piece_act]  =  max(greater); 
+    ind = find(chunks==piece_act);
+    [frames,stains] = ind2sub(tam_chunks,ind);
+    if ~isnan(probchunks(piece_act,1))
+        [m,fish]    =  max(probchunks_relac2(piece_act,:));
+        
+        if m>threshold_probable
+        	[m2,fishorig] = max(probchunks_relac(piece_act,:));
+        
+        if fishorig~=fish
+            fprintf('El piece %g (frames %g-%g) not assigned to your best option. Probability of original allocation = %g. 
+            Original probability of the best option = %g.\n',piece_act,min(frames),max(frames),probchunks_relac(piece_act,fish),
+            probchunks_relac(piece_act,fishorig))
+        end        
+        
+        if sum(abs(probchunks_relac2(piece_act,:)-m)<10^-10)==1
+            piece2fish(piece_act)=fish;
+            probchunks(piece_act,:)=0;
+            probchunks(piece_act,fish)=1;
+         
+            otherschunks_act=find(womb(piece_act,:)>0);
+            otherschunks_act(otherschunks_act==piece_act)=[];
+            otherschunks_act=otherschunks_act(~isnan(probchunks(otherschunks_act,1)));
+        
+            for c_otherschunks=otherschunks_act(:)'
+                otherschunks=find(womb(c_otherschunks,:));
+                otherschunks(otherschunks == c_otherschunks) = [];
+                otherschunks=otherschunks(~isnan(probchunks(otherschunks,1)));
+                original=probchunks_relac2;
+                for c_fishes=1:n_fishes                          
+                    probchunks_relac2(c_otherschunks,c_fishes) = log(probchunks(c_otherschunks,c_fishes));
+                    for c_others=otherschunks(:)'
+                        probarenot=womb(c_otherschunks,c_others);
+                        probchunks_relac2(c_otherschunks,c_fishes) = probchunks_relac2(c_otherschunks,c_fishes) + log(probarenot*(1-probchunks(c_others,c_fishes))+(1-probarenot));
+                    end
+                end
+                probchunks_relac2(c_otherschunks,:) = probchunks_relac2(c_otherschunks,:)-max(probchunks_relac2(c_otherschunks,:));
+                probchunks_relac2(c_otherschunks,:) = exp(probchunks_relac2(c_otherschunks,:));
+                probchunks_relac2(c_otherschunks,:) = probchunks_relac2(c_otherschunks,:)/sum(probchunks_relac2(c_otherschunks,:));                
+            end % c_otherschunks
+        else            
+            fprintf('The piece %g (frames %g-%g) was not assigned due to not having a clear maximum.\n',piece_act,min(frames),max(frames))            
+        end     % if there is a single maximum 
+        else
+            fprintf('The piece %g (frames %g-%g) was not assigned as being too uncertain. Probability of identification: %g
+           (without counting on others), %g (counting on others)\n',piece_act,min(frames),max(frames),probchunks(piece_act,fish),probchunks_relac2(piece_act,fish))            
+        end     % if exceeds the probability threshold
+    end         % if no es nan
+    greater(piece_act) = NaN;
+end             % while remain to be assigned
+
+stain2fish            =  NaN(size(chunks));
+stain2fish(chunks>0)  =  piece2fish(chunks(chunks>0));
