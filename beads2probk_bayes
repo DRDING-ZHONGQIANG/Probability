@@ -1,4 +1,4 @@
-function [fashion, interv95, probk, k] = accounts2probk_bayes (n, n_totals)
+function [fashion, interv95, probk, k] = beads2probk_bayes (n, n_totals)
 
 n_nostops = n_totales-n;
 step = .0001;
