@@ -1,10 +1,10 @@
-function P3_mat=P3_orden2P3_mat(P3_orden,good)
+function P3_mat=P3_order2P3_mat(P3_order,good)
 
-if nargin<2 || isempty(buenos)
-    good=true(1,size(P3_orden,4));
+if nargin<2 || isempty(good)
+    good=true(1,size(P3_order,4));
 end
 
-P3_mat=sum(log(P3_orden(:,:,:,good)),4);
+P3_mat=sum(log(P3_order(:,:,:,good)),4);
 P3_mat=P3_mat-max(P3_mat(:));
 P3_mat=exp(P3_mat);
 P3_mat=P3_mat./repmat(sum(P3_mat,2),[1 size(P3_mat,2) 1]);
