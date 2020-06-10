@@ -1,6 +1,6 @@
-function probchunks = idchunks2probchunks (idchunks, ponminimo)
+function probchunks = idchunks2probchunks (idchunks, poneminimum)
 
-if nargin <2 || isempty (poneminimo)
+if nargin <2 || isempty (poneminimum)
     minimum = false; % It seems to work better like this, see Notebook20130123T152936
 end
 
