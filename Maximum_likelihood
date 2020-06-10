@@ -46,7 +46,7 @@ The semi colon used in the notation P(x; μ, σ) is there to emphasise that the 
 probability distribution. So it shouldn’t be confused with a conditional probability (which is typically represented with a vertical 
 line e.g. P(A| B)).
 
-P(9,9.5,11;mean,sd) = [[1/(sd *sqrt(2*pi)] exp[-(9-mean)(9-mean)/(2*sd*sd)] ]
+P(9,9.5,11;mean,sd) = [[1/(sd *sqrt(2*pi)]  exp[-(9-mean)(9-mean)/(2*sd*sd)] ]
                       *[[1/(sd *sqrt(2*pi)] exp[-(9.5-mean)(9.5-mean)/(2*sd*sd)] ]
                       *[[1/(sd *sqrt(2*pi)] exp[-(11-mean)(11-mean)/(2*sd*sd)] ]
 
@@ -65,9 +65,10 @@ function. This means that if the value on the x-axis increases, the value on the
 important because it ensures that the maximum value of the log of the probability occurs at the same point as the original probability 
 function. Therefore we can work with the simpler log-likelihood instead of the original likelihood.
 
-ln[P(9,9.5,11;mean,sd)] = ln[[1/(sd *sqrt(2*pi)]] -(9-mean)(9-mean)/(2*sd*sd)
+ln[P(9,9.5,11;mean,sd)] = ln[[1/(sd *sqrt(2*pi)]]   -(9-mean)(9-mean)/(2*sd*sd)
                         + ln[[1/(sd *sqrt(2*pi)]]   -(9.5-mean)(9.5-mean)/(2*sd*sd)
                         + ln[[1/(sd *sqrt(2*pi)]]   -(11-mean)(11-mean)/(2*sd*sd)
+                        
                         = -3ln(sd) - 3/2ln(2*pi) - (1/(2*sd*sd))[(9-mean)(9-mean)+(9.5-mean)(9.5-mean)+(11-mean)(11-mean)]
 
 This expression can be differentiated to find the maximum. In this example we’ll find the MLE of the mean, μ. 
