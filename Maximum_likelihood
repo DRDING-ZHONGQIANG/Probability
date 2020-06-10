@@ -93,7 +93,14 @@ is equal to the likelihood of the parameters given the data. But despite these t
 probability density are fundamentally asking different questions — one is asking about the data and the other is asking about 
 the parameter values. This is why the method is called maximum likelihood and not maximum probability.
 
-
+Least squares minimisation is another common method for estimating parameter values for a model in machine learning. It turns out 
+that when the model is assumed to be Gaussian as in the examples above, the MLE estimates are equivalent to the least squares method.
+For a more in-depth mathematical derivation check out these slides. Intuitively we can interpret the connection between the two methods
+by understanding their objectives. For least squares parameter estimation we want to find the line that minimises the total squared 
+distance between the data points and the regression line (see the figure below). In maximum likelihood estimation we want to maximise 
+the total probability of the data. When a Gaussian distribution is assumed, the maximum probability is found when the data points get 
+closer to the mean value. Since the Gaussian distribution is symmetric, this is equivalent to minimising the distance between the data
+points and the mean value.
 
 
 
