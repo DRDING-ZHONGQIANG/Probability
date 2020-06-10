@@ -1,0 +1,26 @@
+Before introducing Bayesian inference, it is necessary to understand Bayes’ theorem. Bayes’ theorem is really cool.
+What makes it useful is that it allows us to use some knowledge or belief that we already have (commonly known as the prior)
+to help us calculate the probability of a related event. For example, if we want to find the probability of selling ice cream
+on a hot and sunny day, Bayes’ theorem gives us the tools to use prior knowledge about the likelihood of selling ice cream on
+any other type of day (rainy, windy, snowy etc.). We’ll talk more about this later so don’t worry if you don’t understand it just yet.
+
+Mathematically Bayes’ theorem is defined as:
+
+P(A|B) = P(B|A)*P(A)/P(B) 
+where A and B are events, P(A|B) is the conditional probability that event A occurs given that event B has already occurred
+(P(B|A) has the same meaning but with the roles of A and B reversed) and P(A) and P(B) are the marginal probabilities of event A 
+and event B occurring respectively.  
+
+Example
+Mathematical definitions can often feel too abstract and scary so let’s try to understand this with an example. One of the examples
+that I gave in the introductory blog post was about picking a card from a pack of traditional playing cards. There are 52 cards in
+the pack, 26 of them are red and 26 are black. What is the probability of the card being a 4 given that we know the card is red?
+To convert this into the math symbols that we see above we can say that event A is the event that the card picked is a 4 and event 
+B is the card being red. Hence, P(A|B) in the equation above is P(4|red) in our example, and this is what we want to calculate. 
+We previously worked out that this probability is equal to 1/13 (there 26 red cards and 2 of those are 4's) but let’s calculate 
+this using Bayes’ theorem.
+We need to find the probabilities for the terms on the right hand side. They are:
+P(B|A) = P(red|4) = 1/2
+P(A) = P(4) = 4/52 = 1/13
+P(B) = P(red) = 1/2
+When we substitute these numbers into the equation for Bayes’ theorem above we get 1/13, which is the answer that we were expecting.
