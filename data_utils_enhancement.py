@@ -25,7 +25,11 @@ class WavReader(object):
                 x1 = np.float16(reader['mix'][:])
                 x2 = np.float16(reader['sph'][:])
                 reader.close()
-                training_data.append([x1, x2])
+                reader = h5py.File(filename+"_mask", 'r')
+                x3 = np.float16(reader['loss_mask_feat'][:])
+                x4 = np.float16(reader['loss_mask_lbl'][:])
+                reader.close()
+                training_data.append([x1, x2, x3, x4])
                 print(i)
             now = datetime.now()
             print("end of loading: date and time", now.strftime("%d/%m/%Y %H:%M:%S"))
@@ -45,14 +49,15 @@ class WavReader(object):
             #reader.close()
             mix = training_data[idx][0]
             sph = training_data[idx][1]
-
+            loss_mask_feat = training_data[idx][2]
+            loss_mask_lbl  = training_data[idx][3]
         else:
             reader = h5py.File(self.in_file, 'r')
             reader_grp = reader[self.wav_dict[idx]]
             mix = reader_grp['mix'][:]
             sph = reader_grp['sph'][:]
             reader.close()
-        return mix, sph
+        return mix, sph, loss_mask_feat, loss_mask_lbl
 
     def __iter__(self):
         for idx in self.wav_indices:
@@ -77,9 +82,13 @@ class PerUttLoader(object):
                 scale = np.max(np.abs(utt[0])) / 0.9
                 utt_eg['mix'] = utt[0] / scale
                 utt_eg['sph'] = utt[1] / scale
+                utt_eg['loss_mask_feat'] = utt[2]
+                utt_eg['loss_mask_lbl']  = utt[3]
             else:
                 utt_eg['mix'] = utt[0]
                 utt_eg['sph'] = utt[1]
+                utt_eg['loss_mask_feat'] = utt[2]
+                utt_eg['loss_mask_lbl']  = utt[3]
             utt_eg['n_samples'] = utt[0].shape[0]
             yield utt_eg
 
@@ -155,6 +164,8 @@ class AudioLoader(object):
                         pad_size = sig_len - batch[i]['mix'].shape[0]
                         batch[i]['mix'] = np.pad(batch[i]['mix'], [(0, pad_size)])
                         batch[i]['sph'] = np.pad(batch[i]['sph'], [(0, pad_size)])
+                        batch[i]['loss_mask_feat'] = batch[i]['loss_mask_feat']
+                        batch[i]['loss_mask_lbl']  = batch[i]['loss_mask_lbl']
             return batch_queue
 
     def to_tensor(self, x) :
@@ -181,6 +192,8 @@ class AudioLoader(object):
             batch = {
                 'mix': torch.stack([self.to_tensor(eg['mix']) for eg in eg_list], dim=0),
                 'sph': torch.stack([self.to_tensor(eg['sph']) for eg in eg_list], dim=0),
+                'loss_mask_feat': torch.stack([self.to_tensor(eg['loss_mask_feat']) for eg in eg_list], dim=0),
+                'loss_mask_lbl': torch.stack([self.to_tensor(eg['loss_mask_lbl']) for eg in eg_list], dim=0),
                 'n_samples': torch.tensor([eg['n_samples'] for eg in eg_list], dtype=torch.int64)
             }
             batch_list.append(batch)
